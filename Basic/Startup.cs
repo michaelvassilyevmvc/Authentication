@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using Basic.AuthorizationRequirements;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +20,30 @@ namespace Basic
                     config.LoginPath = "/Home/Authenticate";
                 });
 
+            services.AddAuthorization(config =>
+            {
+                // var defaultAuthBuilder = new AuthorizationPolicyBuilder();
+                // var defaultAuthPolicy = defaultAuthBuilder
+                // .RequireAuthenticatedUser()
+                // .RequireClaim(ClaimTypes.DateOfBirth)
+                // .Build();
+
+                // config.DefaultPolicy = defaultAuthPolicy;
+
+                // config.AddPolicy("Claim.DoB", policyBuilder =>
+                // {
+                //     policyBuilder.RequireClaim(ClaimTypes.DateOfBirth);
+                // });
+
+                config.AddPolicy("Admin", policyBuilder => policyBuilder.RequireClaim(ClaimTypes.Role, "Admin"));
+
+                config.AddPolicy("Claim.DoB", policyBuilder =>
+               {
+                   policyBuilder.RequireCustomClaim(ClaimTypes.DateOfBirth);
+               });
+            });
+
+            services.AddScoped<IAuthorizationHandler, CustomRequireClaimHandler>();
             services.AddControllersWithViews();
         }
 
